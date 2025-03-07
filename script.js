@@ -29,26 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    // ✅ 新增手動安裝 PWA 按鈕功能
-    let forceInstallButton = document.getElementById('forceInstall');
-    if (forceInstallButton) {
-        forceInstallButton.addEventListener('click', () => {
-            if (window.deferredPrompt) {
-                window.deferredPrompt.prompt();
-                window.deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log("✅ 使用者接受 PWA 安裝");
-                    } else {
-                        console.log("❌ 使用者拒絕 PWA 安裝");
-                    }
-                    window.deferredPrompt = null;
-                });
-            } else {
-                alert("⚠️ 無法安裝 PWA，請確認此瀏覽器是否支援！");
-            }
-        });
-    }
 });
 
 // ✅ 確保 Service Worker 正確註冊
@@ -58,9 +38,68 @@ if ("serviceWorker" in navigator) {
         .catch(error => console.error("❌ Service Worker 註冊失敗", error));
 }
 
+// ✅ IndexedDB 本地資料庫初始化
+let db;
+const request = indexedDB.open("PWA-Accounting", 1);
+
+request.onupgradeneeded = (event) => {
+    db = event.target.result;
+    if (!db.objectStoreNames.contains("transactions")) {
+        db.createObjectStore("transactions", { keyPath: "id", autoIncrement: true });
+    }
+    if (!db.objectStoreNames.contains("categories")) {
+        db.createObjectStore("categories", { keyPath: "id", autoIncrement: true });
+    }
+};
+
+request.onsuccess = (event) => {
+    db = event.target.result;
+    console.log("✅ IndexedDB 已初始化");
+};
+
+request.onerror = (event) => {
+    console.error("❌ IndexedDB 初始化失敗", event);
+};
+
+// ✅ 記錄交易到 IndexedDB
+function saveTransaction(transaction) {
+    const transactionDB = db.transaction(["transactions"], "readwrite");
+    const store = transactionDB.objectStore("transactions");
+    store.add(transaction);
+    console.log("✅ 已儲存交易紀錄", transaction);
+}
+
+// ✅ 取得所有交易紀錄
+function getTransactions(callback) {
+    const transactionDB = db.transaction(["transactions"], "readonly");
+    const store = transactionDB.objectStore("transactions");
+    const request = store.getAll();
+    request.onsuccess = () => {
+        callback(request.result);
+    };
+}
+
+// ✅ 儲存新類別
+function saveCategory(category) {
+    const categoryDB = db.transaction(["categories"], "readwrite");
+    const store = categoryDB.objectStore("categories");
+    store.add(category);
+    console.log("✅ 已儲存類別", category);
+}
+
+// ✅ 取得所有類別
+function getCategories(callback) {
+    const categoryDB = db.transaction(["categories"], "readonly");
+    const store = categoryDB.objectStore("categories");
+    const request = store.getAll();
+    request.onsuccess = () => {
+        callback(request.result);
+    };
+}
+
 // ✅ 開啟 Google Apps Script Web App 頁面
 function openPage(page) {
-    let baseUrl = "https://script.google.com/a/macros/slsh.ntpc.edu.tw/s/AKfycby4dt5yEttAXVUmJgGHrjpfVS9Eie-0NImQDqdqEB8tBQSkaOA8wCNcU4bjBUwcPvP7/exec"; // 替換成你的 Web App URL
+    let baseUrl = "https://script.google.com/a/macros/slsh.ntpc.edu.tw/s/AKfycby4dt5yEttAXVUmJgGHrjpfVS9Eie-0NImQDqdqEB8tBQSkaOA8wCNcU4bjBUwcPvP7/exec";
     let fullUrl = baseUrl + "?page=" + page;
-    window.location.href = fullUrl; // ✅ 改用 `window.location.href`，確保打開新頁面
+    window.location.href = fullUrl; 
 }
