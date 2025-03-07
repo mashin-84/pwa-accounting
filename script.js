@@ -29,6 +29,26 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // ✅ 新增手動安裝 PWA 按鈕功能
+    let forceInstallButton = document.getElementById('forceInstall');
+    if (forceInstallButton) {
+        forceInstallButton.addEventListener('click', () => {
+            if (window.deferredPrompt) {
+                window.deferredPrompt.prompt();
+                window.deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log("✅ 使用者接受 PWA 安裝");
+                    } else {
+                        console.log("❌ 使用者拒絕 PWA 安裝");
+                    }
+                    window.deferredPrompt = null;
+                });
+            } else {
+                alert("⚠️ 無法安裝 PWA，請確認此瀏覽器是否支援！");
+            }
+        });
+    }
 });
 
 // ✅ 確保 Service Worker 正確註冊
