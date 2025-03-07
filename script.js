@@ -1,4 +1,3 @@
-// script.js - PWA 主要前端邏輯
 console.log("✅ script.js 已載入");
 
 // 設定 PWA 安裝邏輯
