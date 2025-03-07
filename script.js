@@ -1,27 +1,27 @@
 console.log("✅ script.js 已載入");
 
-// 設定 PWA 安裝邏輯
-let deferredPrompt; // ✅ 確保這行只出現一次
+window.deferredPrompt = window.deferredPrompt || null; // ✅ 這行確保不會重複
 
 window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
-    deferredPrompt = event;
+    window.deferredPrompt = event;
     document.getElementById('installBanner').style.display = 'block';
 });
 
 document.getElementById('installButton').addEventListener('click', () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
+    if (window.deferredPrompt) {
+        window.deferredPrompt.prompt();
+        window.deferredPrompt.userChoice.then((choiceResult) => {
             if (choiceResult.outcome === 'accepted') {
                 console.log('✅ 使用者接受 PWA 安裝');
             } else {
                 console.log('❌ 使用者拒絕 PWA 安裝');
             }
-            deferredPrompt = null;
+            window.deferredPrompt = null;
         });
     }
 });
+
 
 // **測試 Service Worker 是否正常運作**
 if ("serviceWorker" in navigator) {
