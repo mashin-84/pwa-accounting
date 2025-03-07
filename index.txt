@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>記帳系統 PWA</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <script defer src="script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>記帳系統</h2>
+        <button onclick="openPage('balance')">查看帳戶餘額</button>
+        <button onclick="openPage('fixedExpense')">管理固定支出</button>
+    </div>
+
+    <!-- PWA 安裝按鈕 -->
+    <div id="installBanner" style="display: none;">
+        <button id="installButton">安裝 PWA</button>
+    </div>
+
+    <script>
+        function openPage(page) {
+            let baseUrl = "https://script.google.com/macros/s/YOUR_WEB_APP_ID/exec"; 
+            let fullUrl = baseUrl + "?page=" + page;
+            window.open(fullUrl, "_blank");
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+/* 🍃 文青風 PWA 設計 */
+
+/* 📖 背景 */
+body {
+    font-family: 'Noto Serif TC', 'Cormorant Garamond', serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+    background: #f3efe0; /* 淡米色溫潤背景 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* 📜 文青風容器 */
+.container {
+    max-width: 420px;
+    padding: 30px;
+    border-radius: 12px;
+    background: #fffaf0; /* 暖白色，像一本筆記本 */
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+    border: 2px solid #e0d5b8; /* 仿舊書邊框 */
+}
+
+.container:hover {
+    transform: scale(1.02);
+    box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 🖋️ 標題設計 */
+h2 {
+    color: #5a4a42;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 15px;
+}
+
+/* 🍂 按鈕設計（帶有手寫感） */
+button {
+    margin: 12px 0;
+    padding: 12px;
+    font-size: 17px;
+    font-weight: 500;
+    width: 100%;
+    color: #5a4a42;
+    background: #f3e9dc;
+    border: 2px solid #d5c5a6;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    font-family: 'Noto Serif TC', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* 🍂 按鈕懸停效果 */
+button:hover {
+    background: #e8decd;
+    border-color: #c4b393;
+}
+
+/* 📖 按鈕點擊效果 */
+button:active {
+    background: #e0d5b8;
+}
+
+/* 📝 PWA 安裝提示 */
+#installBanner {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 6px;
+    background: #f3e9dc;
+    border: 2px solid #d5c5a6;
+    text-align: center;
+}
+
+/* ✨ PWA 安裝按鈕 */
+#installBanner button {
+    background: #e8decd;
+    color: #5a4a42;
+    border-color: #c4b393;
+}
+
+#installBanner button:hover {
+    background: #e0d5b8;
+}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>記帳系統 PWA</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <script defer src="script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>記帳系統</h2>
+        <button onclick="openPage('recordTransaction')">記帳輸入</button>
+        <button onclick="openPage('balance')">查看帳戶餘額</button>
+        <button onclick="openPage('fixedExpense')">管理固定支出</button>
+        <button onclick="openPage('addCategory')">新增類別</button>
+        <button onclick="openPage('report')">查看統計報表</button>
+    </div>
+
+    <!-- PWA 安裝按鈕 -->
+    <div id="installBanner" style="display: none;">
+        <button id="installButton">安裝 PWA</button>
+    </div>
+
+    <script>
+        function openPage(page) {
+            let baseUrl = "https://script.google.com/a/macros/slsh.ntpc.edu.tw/s/AKfycby4dt5yEttAXVUmJgGHrjpfVS9Eie-0NImQDqdqEB8tBQSkaOA8wCNcU4bjBUwcPvP7/exec"; // 請替換成你的 Web App URL
+            let fullUrl = baseUrl + "?page=" + page;
+            window.open(fullUrl, "_blank");
+        }
+
+        // PWA 安裝邏輯
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (event) => {
+            event.preventDefault();
+            deferredPrompt = event;
+            document.getElementById('installBanner').style.display = 'block';
+        });
+
+        document.getElementById('installButton').addEventListener('click', () => {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('使用者接受 PWA 安裝');
+                } else {
+                    console.log('使用者拒絕 PWA 安裝');
+                }
+                deferredPrompt = null;
+            });
+        });
+    </script>
+</body>
+</html>
