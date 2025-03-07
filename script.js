@@ -2,24 +2,24 @@
 console.log("✅ script.js 已載入");
 
 // 設定 PWA 安裝邏輯
-let deferredPrompt; // ✅ 只宣告一次
+let deferredPrompt; // ✅ 確保這行只出現一次
 
-window.addEventListener("beforeinstallprompt", (event) => {
+window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
-    deferredPrompt = event; // ✅ 只儲存一次
-    document.getElementById("installBanner").style.display = "block";
+    deferredPrompt = event;
+    document.getElementById('installBanner').style.display = 'block';
 });
 
-document.getElementById("installButton").addEventListener("click", () => {
+document.getElementById('installButton').addEventListener('click', () => {
     if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === "accepted") {
-                console.log("✅ 使用者接受 PWA 安裝");
+            if (choiceResult.outcome === 'accepted') {
+                console.log('✅ 使用者接受 PWA 安裝');
             } else {
-                console.log("❌ 使用者拒絕 PWA 安裝");
+                console.log('❌ 使用者拒絕 PWA 安裝');
             }
-            deferredPrompt = null; // 🔄 避免重複觸發
+            deferredPrompt = null;
         });
     }
 });

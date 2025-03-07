@@ -10,38 +10,36 @@ const CACHE_FILES = [
 ];
 
 
-self.addEventListener("install", (event) => {
+self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(CACHE_FILES)
-                .catch(err => console.error("❌ Cache addAll 失敗", err));
+        caches.open('pwa-cache-v3').then((cache) => { // 🔥 改版快取名稱
+            return cache.addAll([
+                './', // ✅ 這裡用 `./` 確保是相對路徑
+                './index.html',
+                './styles.css',
+                './script.js',
+                './manifest.json',
+                './icon/icon-192.png',
+                './icon/icon-512.png'
+            ]).catch(err => {
+                console.error('❌ Cache addAll 失敗', err);
+            });
         })
     );
-    self.skipWaiting(); // 讓 Service Worker 立即啟動
 });
 
-
-self.addEventListener("fetch", (event) => {
-    event.respondWith(
-        caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
-        }).catch(err => console.error("❌ 讀取快取失敗", err))
-    );
-});
-
-
-self.addEventListener("activate", (event) => {
+// 🆕 強制刪除舊快取
+self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cache) => {
-                    if (cache !== CACHE_NAME) {
-                        console.log("🗑️ 刪除舊快取：", cache);
-                        return caches.delete(cache);
-                    }
-                })
-            );
+        caches.keys().then((keyList) => {
+            return Promise.all(keyList.map((key) => {
+                if (key !== 'pwa-cache-v3') { // 只保留最新的快取
+                    console.log("🗑️ 刪除舊快取：", key);
+                    return caches.delete(key);
+                }
+            }));
         })
     );
+});
     self.clients.claim(); // 讓新的 Service Worker 立即生效
 });
