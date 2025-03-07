@@ -1,12 +1,12 @@
-const CACHE_NAME = "pwa-cache-v5"; // 🔥 每次更新時增加版本號，強制刷新快取
+const CACHE_NAME = "pwa-cache-v6"; // 每次更新版本強制刷新
 const CACHE_FILES = [
-    "./",
-    "./index.html",
-    "./styles.css",
-    "./script.js",
-    "./manifest.json",
-    "./icon/icon-192.png",
-    "./icon/icon-512.png"
+    "/pwa-accounting/",
+    "/pwa-accounting/index.html",
+    "/pwa-accounting/styles.css",
+    "/pwa-accounting/script.js",
+    "/pwa-accounting/manifest.json",
+    "/pwa-accounting/icon/icon-192.png",
+    "/pwa-accounting/icon/icon-512.png"
 ];
 
 // 🛠️ 安裝 Service Worker 並快取資源
