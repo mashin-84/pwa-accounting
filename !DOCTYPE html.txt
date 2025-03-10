@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA 記帳系統</title>
+    <link rel="manifest" href="manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('serviceWorker.js');
+        }
+    </script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        input, select, button { margin: 10px; padding: 10px; width: 90%; max-width: 400px; }
+        #recordList { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h2>記帳輸入</h2>
+    <input type="date" id="date" required>
+    <select id="account"></select>
+    <select id="type" onchange="updateCategoryList()">
+        <option value="支出">支出</option>
+        <option value="收入">收入</option>
+    </select>
+    <select id="category"></select>
+    <input type="number" id="amount" placeholder="金額" required>
+    <input type="text" id="description" placeholder="花費內容">
+    <button onclick="saveRecord()">儲存</button>
+    
+    <h3>數據同步</h3>
+    <button onclick="confirmUpload()">📤 上傳資料</button>
+    <button onclick="confirmDownload()">📥 下載資料</button>
+    
+    <h3>記帳清單</h3>
+    <button onclick="showRecords()">📋 查看記帳清單</button>
+    <div id="recordList"></div>
+
+    <script>
+        let apiUrl = "https://script.google.com/macros/s/AKfycby4dt5yEttAXVUmJgGHrjpfVS9Eie-0NImQDqdqEB8tBQSkaOA8wCNcU4bjBUwcPvP7/exec";
+        let records = JSON.parse(localStorage.getItem("records")) || [];
+        let categories = { accounts: [], income: [], expense: [] };
+
+        function fetchCategoriesFromSheet() {
+            fetch(apiUrl + "?action=getCategories")
+            .then(response => response.json())
+            .then(data => {
+                if (data["帳戶清單"] && data["收入類別清單"] && data["支出類別清單"]) {
+                    categories.accounts = data["帳戶清單"];
+                    categories.income = data["收入類別清單"];
+                    categories.expense = data["支出類別清單"];
+                    localStorage.setItem("categories", JSON.stringify(categories));
+                    populateAccounts();
+                    updateCategoryList();
+                } else {
+                    console.error("無法獲取正確的類別數據: ", data);
+                }
+            })
+            .catch(error => console.error("從試算表獲取類別失敗: ", error));
+        }
+        
+        function updateCategoryList() {
+            let type = document.getElementById("type").value;
+            let categorySelect = document.getElementById("category");
+            categorySelect.innerHTML = "";
+            let selectedCategories = type === "收入" ? categories.income : categories.expense;
+            selectedCategories.forEach(cat => {
+                let option = document.createElement("option");
+                option.value = cat;
+                option.textContent = cat;
+                categorySelect.appendChild(option);
+            });
+        }
+        
+        function populateAccounts() {
+            let accountSelect = document.getElementById("account");
+            accountSelect.innerHTML = "";
+            categories.accounts.forEach(account => {
+                let option = document.createElement("option");
+                option.value = account;
+                option.textContent = account;
+                accountSelect.appendChild(option);
+            });
+        }
+        
+        function initializeForm() {
+            fetchCategoriesFromSheet();
+        }
+
+        function saveRecord() {
+            let record = {
+                date: document.getElementById("date").value,
+                account: document.getElementById("account").value,
+                category: document.getElementById("category").value,
+                amount: document.getElementById("amount").value,
+                description: document.getElementById("description").value,
+                type: document.getElementById("type").value
+            };
+            records.push(record);
+            localStorage.setItem("records", JSON.stringify(records));
+            alert("記錄已儲存！");
+        }
+
+        function confirmUpload() {
+            if (confirm("確定要上傳資料嗎？這將同步手機上的記帳資料至 Google 試算表，並刪除已刪除的項目。")) {
+                uploadData();
+            }
+        }
+
+        function confirmDownload() {
+            if (confirm("確定要下載資料嗎？這將清除手機上的記帳資料，並同步 Google 試算表的資料至手機。")) {
+                downloadData();
+            }
+        }
+
+        function uploadData() {
+            fetch(apiUrl, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "upload", records: records })
+            })
+            .then(response => {
+                alert("資料上傳成功！");
+            })
+            .catch(error => alert("上傳失敗: " + error));
+        }
+
+        function downloadData() {
+            fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                records = data;
+                localStorage.setItem("records", JSON.stringify(records));
+                alert("資料下載成功！");
+            })
+            .catch(error => alert("下載失敗: " + error));
+        }
+
+        function showRecords() {
+            let list = document.getElementById("recordList");
+            list.innerHTML = "";
+            records.forEach((record, index) => {
+                list.innerHTML += `<div>${record.date} - ${record.type} - ${record.account} - ${record.category} - ${record.amount} <button onclick="deleteRecord(${index})">❌</button></div>`;
+            });
+        }
+
+        function deleteRecord(index) {
+            records.splice(index, 1);
+            localStorage.setItem("records", JSON.stringify(records));
+            showRecords();
+        }
+
+        window.onload = function() {
+            initializeForm();
+        };
+    </script>
+</body>
+</html>

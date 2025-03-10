@@ -1,0 +1,100 @@
+function doGet(e) {
+  var action = e.parameter.action;
+
+  if (action === "getCategories") {
+    return getCategories();
+  } else if (action === "getStats") {
+    return ContentService.createTextOutput(JSON.stringify(getStats())).setMimeType(ContentService.MimeType.JSON);
+  } else {
+    return ContentService.createTextOutput(JSON.stringify(getRecords())).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doPost(e) {
+  var data = JSON.parse(e.postData.contents);
+  var action = data.action;
+  
+  var response = {};
+  if (action === "upload") {
+    response = uploadRecords(data.records);
+  }
+  
+  return ContentService
+         .createTextOutput(JSON.stringify(response))
+         .setMimeType(ContentService.MimeType.JSON)
+         .setHeader("Access-Control-Allow-Origin", "*")
+         .setHeader("Access-Control-Allow-Methods", "POST")
+         .setHeader("Access-Control-Allow-Headers", "Content-Type");
+}
+
+function getRecords() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("記帳");
+  var rows = sheet.getDataRange().getValues();
+  var records = [];
+  
+  for (var i = 1; i < rows.length; i++) {
+    var formattedDate = formatDate(rows[i][0]);
+    var type = rows[i][6];
+    var category = type === "收入" ? rows[i][2] : rows[i][3]; // 確保收入取 C 欄，支出取 D 欄
+    
+    records.push({
+      date: formattedDate,
+      account: rows[i][1],
+      category: category || "", // 避免 undefined，確保空值返回 ""
+      amount: rows[i][4],
+      description: rows[i][5],
+      type: type
+    });
+  }
+  return records;
+}
+
+function uploadRecords(records) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("記帳");
+  var lastRow = sheet.getLastRow();
+  
+  // 先清空「記帳」分頁內的所有資料（只保留標題）
+  if (lastRow > 1) {
+    sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
+  }
+  
+  // 重新寫入本地資料
+  records.forEach(record => {
+    let incomeCategory = record.type === "收入" ? record.category : "";
+    let expenseCategory = record.type === "支出" ? record.category : "";
+    
+    sheet.appendRow([
+      formatDate(record.date), record.account, incomeCategory, expenseCategory, record.amount, record.description, record.type
+    ]);
+  });
+  
+  return { success: true, message: "記帳資料已同步，已清除並重寫所有記錄" };
+}
+
+function formatDate(date) {
+  if (date instanceof Date) {
+    return Utilities.formatDate(date, Session.getScriptTimeZone(), "yyyy-MM-dd");
+  } else if (typeof date === "string" && date.includes("T")) {
+    return date.split("T")[0];
+  }
+  return date;
+}
+
+function getCategories() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet();
+  var accountSheet = sheet.getSheetByName("帳戶清單");
+  var incomeSheet = sheet.getSheetByName("收入類別清單");
+  var expenseSheet = sheet.getSheetByName("支出類別清單");
+
+  var accounts = accountSheet ? accountSheet.getRange("A2:A" + accountSheet.getLastRow()).getValues().flat() : [];
+  var incomeCategories = incomeSheet ? incomeSheet.getRange("A2:A" + incomeSheet.getLastRow()).getValues().flat() : [];
+  var expenseCategories = expenseSheet ? expenseSheet.getRange("A2:A" + expenseSheet.getLastRow()).getValues().flat() : [];
+
+  var data = {
+    "帳戶清單": accounts,
+    "收入類別清單": incomeCategories,
+    "支出類別清單": expenseCategories
+  };
+  
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+}

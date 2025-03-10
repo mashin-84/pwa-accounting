@@ -1,0 +1,23 @@
+{
+  "id": "/pwa-accounting/",
+  "name": "記帳系統 PWA",
+  "short_name": "記帳PWA",
+  "description": "一款用於記帳的 PWA 應用程式",
+  "start_url": "/pwa-accounting/",
+  "scope": "/pwa-accounting/",
+  "display": "standalone",
+  "background_color": "#f3efe0",
+  "theme_color": "#5a4d3b",
+  "icons": [
+    {
+      "src": "./icon/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
